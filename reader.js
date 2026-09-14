@@ -444,6 +444,13 @@
       viewer.innerHTML = "";
       tocList.innerHTML = "";
 
+      // Mostrar pantalla del lector de inmediato (bajo el loader flotante) para que #viewer tenga dimensiones reales calculadas
+      startScreen.classList.add("hidden");
+      readerScreen.classList.remove("hidden");
+
+      // Esperar un frame para garantizar que el DOM calcule el tamaño de #viewer
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
       book = ePub(source);
       bookKey = name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
 
@@ -547,6 +554,17 @@
         throw new Error("No se pudo mostrar ninguna sección del libro. Comprueba que el archivo sea un EPUB válido.");
       }
 
+      // Forzar recarga y redibujado de la página (el mismo mecanismo que ocurre al pasar/retroceder página)
+      try {
+        rendition.resize();
+        const loc = rendition.currentLocation();
+        if (loc && loc.start && loc.start.cfi) {
+          await rendition.display(loc.start.cfi);
+        }
+      } catch (refreshErr) {
+        console.warn("Aviso en refresco de página:", refreshErr);
+      }
+
       // Locations for progress
       book.ready.then(() => {
         book.locations.generate(1024).then(() => {
@@ -582,15 +600,16 @@
       rendition.on("keyup", keyListener);
       document.addEventListener("keyup", keyListener);
 
-      // Show reader screen
-      startScreen.classList.add("hidden");
-      readerScreen.classList.remove("hidden");
+      // Esperar brevemente a que el iframe dibuje el contenido antes de desvanecer el loader
+      await new Promise((resolve) => setTimeout(resolve, 160));
 
       // Finalizar loader
       hideLoader();
     } catch (err) {
       console.error(err);
       showLoaderError(err.message || String(err));
+      readerScreen.classList.add("hidden");
+      startScreen.classList.remove("hidden");
     }
   }
 
@@ -603,12 +622,16 @@
     }
   }
 
-  // Debounced window resize for BeeLine
+  // Debounced window resize for rendition and BeeLine
   let resizeTimeout = null;
   window.addEventListener("resize", () => {
-    if (!beelineEnabled || !rendition) return;
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(applyBeeLine, 150);
+    if (rendition) {
+      rendition.resize();
+    }
+    if (beelineEnabled && rendition) {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(applyBeeLine, 150);
+    }
   });
 
   // ========== Helper para carga por URL con streaming ==========

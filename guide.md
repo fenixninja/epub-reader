@@ -185,18 +185,16 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
 #### `openBook(source, name = "libro")`
 * **Objetivo:** Función central que procesa, descomprime y renderiza el libro EPUB desde un ArrayBuffer o URL con seguimiento porcentual y tolerancia a fallos.
 * **Operaciones:**
-  1. **Inicio del Loader (35%):** Muestra `#loader-overlay` informando del inicio de la descompresión.
+  1. **Inicio del Loader y Precálculo de Dimensiones (35%):** Muestra `#loader-overlay` y activa `#reader-screen` bajo el loader para que `#viewer` disponga de dimensiones reales en píxeles antes de instanciar el rendition.
   2. **Limpieza:** Destruye cualquier instancia previa (`book.destroy()`) y limpia los contenedores `#viewer` y `#toc-list`.
   3. **Inicialización y Descompresión (55%):** Invoca `book = ePub(source)` y define `bookKey` sanitizado.
   4. **Metadatos e Indexación (70% - 85%):** Procesa `book.loaded.metadata` y `book.loaded.spine` para preparar títulos y árbol de capítulos.
   5. **Configuración de Rendition (90%):** Crea la instancia `book.renderTo(viewer, options)` y registra los hooks de tipografía y prevención de `unload`.
-  6. **Estrategia de Renderizado en Cascada (Fallback Antifallos):**
-     Para evitar pantallas en blanco o que el usuario tenga que ir manualmente al TOC si una posición guardada está corrupta o no coincide con la edición del libro, ejecuta cuatro intentos sucesivos:
-     * *Intento 1:* Carga la posición guardada (`loadSavedLocation()`). Si lanza error, elimina el CFI dañado de `localStorage` y continúa automáticamente.
-     * *Intento 2:* Ejecuta `rendition.display()` estándar (inicio natural del documento).
-     * *Intento 3:* Si el anterior falla, obtiene el primer elemento del spine (`book.spine.spineItems[0].href`) y lo renderiza directamente.
-     * *Intento 4:* Si persiste el fallo, consulta `book.loaded.navigation` y proyecta el primer enlace del índice (`nav.toc[0].href`).
-  7. **Finalización (100%):** Oculta `#start-screen`, revela `#reader-screen`, aplica temas, fuentes y BeeLine, y oculta el loader.
+  6. **Estrategia de Renderizado en Cascada y Refresco Forzado:**
+     Para evitar pantallas en blanco o que el usuario tenga que ir manualmente al TOC o pulsar avanzar/retroceder:
+     * Ejecuta cuatro intentos de despliegue en orden: ubicación guardada (`saved CFI`), `rendition.display()` estándar, primer spine item (`spineItems[0]`), y primer capítulo de navegación (`toc[0]`).
+     * Realiza un refresco forzado (`rendition.resize()` y re-renderizado de la ubicación inicial), asegurando que la portada o la primera página se pinten de inmediato con las dimensiones correctas del visor.
+  7. **Finalización (100%):** Concede un breve tiempo de pintado al iframe (160ms) para garantizar visibilidad nítida y desvanece suavemente el loader.
 
 #### `loadBookFromUrl(url, name)`
 * **Objetivo:** Descarga libros desde enlaces web o rutas relativas utilizando la API `ReadableStream` para reportar el porcentaje real de descarga en tiempo real antes de pasar el ArrayBuffer a `openBook`.
