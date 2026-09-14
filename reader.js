@@ -433,7 +433,7 @@
   // ========== Load book ==========
   async function openBook(source, name = "libro") {
     try {
-      showLoader("Descomprimiendo libro...", 35);
+      showLoader(window.i18n ? window.i18n.t("loader_decompressing", "Descomprimiendo libro...") : "Descomprimiendo libro...", 35);
 
       // Clean previous
       if (book) {
@@ -454,14 +454,15 @@
       book = ePub(source);
       bookKey = name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
 
-      updateLoader(55, "Analizando contenedor y recursos...");
+      updateLoader(55, window.i18n ? window.i18n.t("loader_parsing", "Analizando contenedor y recursos...") : "Analizando contenedor y recursos...");
 
       // Metadata
       book.loaded.metadata.then((meta) => {
         bookTitle.textContent = meta.title || name;
+        bookTitle.dataset.hasLoadedBook = "true";
         bookAuthor.textContent = meta.creator || "";
-        document.title = `${meta.title || name} · Lector EPUB`;
-        updateLoader(72, "Cargando metadatos...");
+        document.title = `${meta.title || name} · EPUB`;
+        updateLoader(72, window.i18n ? window.i18n.t("loader_metadata", "Cargando metadatos...") : "Cargando metadatos...");
       });
 
       // Render
@@ -489,14 +490,14 @@
         }
       });
 
-      updateLoader(82, "Indexando capítulos...");
+      updateLoader(82, window.i18n ? window.i18n.t("loader_indexing", "Indexando capítulos...") : "Indexando capítulos...");
 
       // Apply theme + font
       applyTheme(currentTheme);
       setFontSize(fontSize);
       applyReadingMode(currentReadingMode);
 
-      updateLoader(90, "Renderizando páginas...");
+      updateLoader(90, window.i18n ? window.i18n.t("loader_rendering", "Renderizando páginas...") : "Renderizando páginas...");
 
       // ========== Estrategia de Renderizado en Cascada (Fallback) ==========
       let displayed = false;
@@ -551,7 +552,7 @@
       }
 
       if (!displayed) {
-        throw new Error("No se pudo mostrar ninguna sección del libro. Comprueba que el archivo sea un EPUB válido.");
+        throw new Error(window.i18n ? window.i18n.t("error_invalid_epub", "No se pudo mostrar ninguna sección del libro.") : "No se pudo mostrar ninguna sección del libro.");
       }
 
       // Forzar recarga y redibujado de la página (el mismo mecanismo que ocurre al pasar/retroceder página)
@@ -636,7 +637,8 @@
 
   // ========== Helper para carga por URL con streaming ==========
   async function loadBookFromUrl(url, name) {
-    showLoader("Descargando libro...", 5);
+    const downloadMsg = window.i18n ? window.i18n.t("loader_downloading", "Descargando libro...") : "Descargando libro...";
+    showLoader(downloadMsg, 5);
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -657,7 +659,7 @@
           chunks.push(value);
           receivedBytes += value.length;
           const pct = Math.round((receivedBytes / totalBytes) * 30);
-          updateLoader(pct, "Descargando libro...");
+          updateLoader(pct, downloadMsg);
         }
         const allChunks = new Uint8Array(receivedBytes);
         let position = 0;
@@ -667,14 +669,15 @@
         }
         buffer = allChunks.buffer;
       } else {
-        updateLoader(20, "Descargando libro...");
+        updateLoader(20, downloadMsg);
         buffer = await response.arrayBuffer();
       }
 
       await openBook(buffer, name);
     } catch (err) {
       console.error(err);
-      showLoaderError(`Error al cargar desde URL:\n${err.message || err}`);
+      const prefix = window.i18n ? window.i18n.t("error_url_load", "Error al cargar desde URL:\n") : "Error al cargar desde URL:\n";
+      showLoaderError(`${prefix}${err.message || err}`);
     }
   }
 
@@ -684,13 +687,14 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    showLoader("Leyendo archivo...", 5);
+    const readMsg = window.i18n ? window.i18n.t("loader_parsing", "Leyendo archivo...") : "Leyendo archivo...";
+    showLoader(readMsg, 5);
     const reader = new FileReader();
 
     reader.onprogress = (ev) => {
       if (ev.lengthComputable) {
         const pct = Math.round((ev.loaded / ev.total) * 30);
-        updateLoader(pct, "Leyendo archivo...");
+        updateLoader(pct, readMsg);
       }
     };
 
@@ -699,7 +703,7 @@
     };
 
     reader.onerror = () => {
-      showLoaderError("No se pudo leer el archivo local seleccionado.");
+      showLoaderError(window.i18n ? window.i18n.t("error_file_read", "No se pudo leer el archivo seleccionado.") : "No se pudo leer el archivo seleccionado.");
     };
 
     reader.readAsArrayBuffer(file);
@@ -718,19 +722,20 @@
     dropZone.classList.remove("dragover");
     const file = e.dataTransfer.files[0];
     if (file && file.name.toLowerCase().endsWith(".epub")) {
-      showLoader("Leyendo archivo...", 5);
+      const readMsg = window.i18n ? window.i18n.t("loader_parsing", "Leyendo archivo...") : "Leyendo archivo...";
+      showLoader(readMsg, 5);
       const reader = new FileReader();
       reader.onprogress = (ev) => {
         if (ev.lengthComputable) {
           const pct = Math.round((ev.loaded / ev.total) * 30);
-          updateLoader(pct, "Leyendo archivo...");
+          updateLoader(pct, readMsg);
         }
       };
       reader.onload = (ev) => openBook(ev.target.result, file.name);
-      reader.onerror = () => showLoaderError("No se pudo leer el archivo arrastrado.");
+      reader.onerror = () => showLoaderError(window.i18n ? window.i18n.t("error_drag_read", "No se pudo leer el archivo arrastrado.") : "No se pudo leer el archivo arrastrado.");
       reader.readAsArrayBuffer(file);
     } else {
-      alert("Por favor suelta un archivo .epub");
+      alert(window.i18n ? window.i18n.t("error_not_epub", "Por favor suelta un archivo .epub") : "Por favor suelta un archivo .epub");
     }
   });
 
@@ -767,9 +772,10 @@
     document.removeEventListener("keyup", keyListener);
     viewer.innerHTML = "";
     tocList.innerHTML = "";
+    bookTitle.dataset.hasLoadedBook = "";
     readerScreen.classList.add("hidden");
     startScreen.classList.remove("hidden");
-    document.title = "Lector EPUB · GitHub Pages";
+    document.title = window.i18n ? window.i18n.t("page_title", "Lector EPUB · GitHub Pages") : "Lector EPUB · GitHub Pages";
     fileInput.value = "";
     loaderOverlay.classList.add("hidden");
   });
@@ -812,7 +818,7 @@
   document.querySelectorAll(".flow-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       setFlow(btn.dataset.flow);
-      alert("El modo de visualización se aplicará la próxima vez que abras un libro.");
+      alert(window.i18n ? window.i18n.t("flow_alert", "El modo de visualización se aplicará la próxima vez que abras un libro.") : "El modo de visualización se aplicará la próxima vez que abras un libro.");
     });
   });
 

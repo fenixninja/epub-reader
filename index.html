@@ -43,30 +43,46 @@
   <!-- JSZip + epub.js desde CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+  <script src="i18n.js"></script>
 </head>
 
 <body>
   <!-- Pantalla de inicio -->
   <div id="start-screen" class="screen">
     <div class="start-card">
-      <h1>EPUB</h1>
-      <p class="subtitle">Lector de libros EPUB</p>
+      <div class="start-lang-bar">
+        <label for="start-lang-select" class="lang-select-wrapper">
+          <span class="lang-icon" aria-hidden="true">🌐</span>
+          <select id="start-lang-select" class="i18n-select" aria-label="Idioma / Language">
+            <option value="es">🇪🇸 Español</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="hi">🇮🇳 हिन्दी</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+          </select>
+        </label>
+      </div>
+
+      <h1 data-i18n="app_title">EPUB</h1>
+      <p class="subtitle" data-i18n="app_subtitle">Lector de libros EPUB</p>
 
       <div class="drop-zone" id="drop-zone">
         <div class="drop-icon">📁</div>
-        <p>Arrastra un archivo <strong>.epub</strong> aquí</p>
-        <p class="or">o</p>
+        <p data-i18n="drop_title">Arrastra un archivo <strong>.epub</strong> aquí</p>
+        <p class="or" data-i18n="drop_or">o</p>
         <label class="btn primary">
-          Elegir archivo
+          <span data-i18n="drop_choose">Elegir archivo</span>
           <input type="file" id="file-input" accept=".epub" hidden />
         </label>
       </div>
 
       <div class="url-section">
-        <p>O carga desde una URL:</p>
+        <p data-i18n="url_heading">O carga desde una URL:</p>
         <div class="url-row">
-          <input type="url" id="url-input" placeholder="https://ejemplo.com/libro.epub" />
-          <button id="load-url-btn" class="btn">Cargar</button>
+          <input type="url" id="url-input" placeholder="https://ejemplo.com/libro.epub" data-i18n-placeholder="url_placeholder" />
+          <button id="load-url-btn" class="btn" data-i18n="url_load_btn">Cargar</button>
         </div>
       </div>
 
@@ -74,8 +90,8 @@
         <button type="button" id="load-whatauth-btn" class="featured-book-btn" data-book-url="./libros/demo.epub">
           <span class="featured-book-icon">📖</span>
           <span class="featured-book-info">
-            <span class="featured-book-badge">Libro gratis</span>
-            <span class="featured-book-title">Leer el libro de <strong>WhatAUTH</strong> gratis</span>
+            <span class="featured-book-badge" data-i18n="whatauth_badge">Libro gratis</span>
+            <span class="featured-book-title" data-i18n="whatauth_title">Leer el libro de <strong>WhatAUTH</strong> gratis</span>
           </span>
           <span class="featured-book-arrow" aria-hidden="true">→</span>
         </button>
@@ -84,14 +100,14 @@
 
     <footer class="start-footer">
       <span class="author-credit">
-        Autor: <a href="https://fenix.ninja" target="_blank" rel="noopener noreferrer"><strong>fenix.ninja</strong></a>
+        <span data-i18n="footer_author">Autor:</span> <a href="https://fenix.ninja" target="_blank" rel="noopener noreferrer"><strong>fenix.ninja</strong></a>
       </span>
       <span class="footer-dot" aria-hidden="true">•</span>
-      <a href="https://github.com/fenixninja/epub-reader" target="_blank" rel="noopener noreferrer" class="github-code-link" title="Ver código en GitHub">
+      <a href="https://github.com/fenixninja/epub-reader" target="_blank" rel="noopener noreferrer" class="github-code-link" title="Ver código en GitHub" data-i18n-title="footer_github">
         <svg class="github-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
         </svg>
-        <span>Ver código en GitHub</span>
+        <span data-i18n="footer_github">Ver código en GitHub</span>
       </a>
     </footer>
   </div>
@@ -100,22 +116,22 @@
   <div id="reader-screen" class="screen hidden">
     <!-- Barra superior -->
     <header id="toolbar">
-      <button id="btn-back" class="icon-btn" title="Volver">←</button>
+      <button id="btn-back" class="icon-btn" title="Volver" data-i18n-title="btn_back">←</button>
       <div class="book-info">
-        <span id="book-title">Cargando...</span>
+        <span id="book-title" data-i18n="book_loading">Cargando...</span>
         <span id="book-author"></span>
       </div>
       <div class="toolbar-actions">
-        <button id="btn-toc" class="icon-btn" title="Tabla de contenidos">☰</button>
-        <button id="btn-settings" class="icon-btn" title="Ajustes">⚙</button>
+        <button id="btn-toc" class="icon-btn" title="Tabla de contenidos" data-i18n-title="btn_toc">☰</button>
+        <button id="btn-settings" class="icon-btn" title="Ajustes" data-i18n-title="btn_settings">⚙</button>
       </div>
     </header>
 
     <!-- Área del libro -->
     <main id="viewer-container">
       <div id="viewer"></div>
-      <button id="prev" class="nav-btn left" title="Anterior">‹</button>
-      <button id="next" class="nav-btn right" title="Siguiente">›</button>
+      <button id="prev" class="nav-btn left" title="Anterior" data-i18n-title="nav_prev">‹</button>
+      <button id="next" class="nav-btn right" title="Siguiente" data-i18n-title="nav_next">›</button>
     </main>
 
     <!-- Barra de progreso -->
@@ -127,7 +143,7 @@
     <!-- Panel lateral TOC -->
     <aside id="toc-panel" class="panel">
       <div class="panel-header">
-        <h2>Contenidos</h2>
+        <h2 data-i18n="panel_toc_title">Contenidos</h2>
         <button id="close-toc" class="icon-btn">×</button>
       </div>
       <nav id="toc-list"></nav>
@@ -136,63 +152,78 @@
     <!-- Panel de ajustes -->
     <aside id="settings-panel" class="panel">
       <div class="panel-header">
-        <h2>Ajustes</h2>
+        <h2 data-i18n="panel_settings_title">Ajustes</h2>
         <button id="close-settings" class="icon-btn">×</button>
       </div>
       <div class="settings-content">
         <div class="setting-group">
-          <label>Tema</label>
-          <div class="theme-buttons">
-            <button data-theme="light" class="theme-btn active">Claro</button>
-            <button data-theme="sepia" class="theme-btn">Sepia</button>
-            <button data-theme="dark" class="theme-btn">Oscuro</button>
+          <label data-i18n="setting_language">Idioma</label>
+          <div class="lang-select-wrapper full-width">
+            <span class="lang-icon" aria-hidden="true">🌐</span>
+            <select id="settings-lang-select" class="i18n-select" aria-label="Idioma / Language">
+              <option value="es">🇪🇸 Español</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="hi">🇮🇳 हिन्दी</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="ja">🇯🇵 日本語</option>
+            </select>
           </div>
         </div>
         <div class="setting-group">
-          <label>Modo de lectura</label>
+          <label data-i18n="setting_theme">Tema</label>
+          <div class="theme-buttons">
+            <button data-theme="light" class="theme-btn active" data-i18n="theme_light">Claro</button>
+            <button data-theme="sepia" class="theme-btn" data-i18n="theme_sepia">Sepia</button>
+            <button data-theme="dark" class="theme-btn" data-i18n="theme_dark">Oscuro</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label data-i18n="setting_reading_mode">Modo de lectura</label>
           <div class="reading-mode-buttons">
             <button data-reading-mode="fast" class="reading-mode-btn active"
-              title="Lectura rápida con tipografía optimizada Fast Sans">
-              <span class="mode-title">⚡ Lectura rápida</span>
-              <span class="mode-sub">Fast Sans</span>
+              title="Lectura rápida con tipografía optimizada Fast Sans" data-i18n-title="mode_fast_tooltip">
+              <span class="mode-title" data-i18n="mode_fast_title">⚡ Lectura rápida</span>
+              <span class="mode-sub" data-i18n="mode_fast_sub">Fast Sans</span>
             </button>
-            <button data-reading-mode="normal" class="reading-mode-btn" title="Lectura tradicional con tipografía Sans">
-              <span class="mode-title">📖 Lectura normal</span>
-              <span class="mode-sub">Sans clásico</span>
+            <button data-reading-mode="normal" class="reading-mode-btn" title="Lectura tradicional con tipografía Sans" data-i18n-title="mode_normal_tooltip">
+              <span class="mode-title" data-i18n="mode_normal_title">📖 Lectura normal</span>
+              <span class="mode-sub" data-i18n="mode_normal_sub">Sans clásico</span>
             </button>
           </div>
         </div>
         <div class="setting-group beeline-group">
           <div class="setting-header-row">
-            <label for="beeline-toggle" class="clickable-label">BeeLine Reader</label>
+            <label for="beeline-toggle" class="clickable-label" data-i18n="beeline_title">BeeLine Reader</label>
             <label class="toggle-switch">
               <input type="checkbox" id="beeline-toggle" />
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <p class="setting-hint">Degradados de color en cada línea que guían la vista para leer más rápido y sin
+          <p class="setting-hint" data-i18n="beeline_hint">Degradados de color en cada línea que guían la vista para leer más rápido y sin
             saltos.</p>
           <div id="beeline-palette-options" class="palette-options hidden">
-            <span class="sub-label">Estilo de degradado</span>
+            <span class="sub-label" data-i18n="beeline_style_label">Estilo de degradado</span>
             <div class="gradient-grid">
               <button class="gradient-btn active" data-gradient="sunset"
-                title="Degradado Atardecer: Violeta, Magenta y Coral">
+                title="Degradado Atardecer: Violeta, Magenta y Coral" data-i18n-title="gradient_sunset_tooltip">
                 <span class="gradient-preview gradient-sunset"></span>
-                <span class="gradient-name">Atardecer</span>
+                <span class="gradient-name" data-i18n="gradient_sunset_name">Atardecer</span>
               </button>
-              <button class="gradient-btn" data-gradient="ocean" title="Degradado Océano: Azul, Cian y Esmeralda">
+              <button class="gradient-btn" data-gradient="ocean" title="Degradado Océano: Azul, Cian y Esmeralda" data-i18n-title="gradient_ocean_tooltip">
                 <span class="gradient-preview gradient-ocean"></span>
-                <span class="gradient-name">Océano</span>
+                <span class="gradient-name" data-i18n="gradient_ocean_name">Océano</span>
               </button>
-              <button class="gradient-btn" data-gradient="aurora" title="Degradado Aurora: Púrpura, Azul Neón y Menta">
+              <button class="gradient-btn" data-gradient="aurora" title="Degradado Aurora: Púrpura, Azul Neón y Menta" data-i18n-title="gradient_aurora_tooltip">
                 <span class="gradient-preview gradient-aurora"></span>
-                <span class="gradient-name">Aurora</span>
+                <span class="gradient-name" data-i18n="gradient_aurora_name">Aurora</span>
               </button>
             </div>
           </div>
         </div>
         <div class="setting-group">
-          <label>Tamaño de fuente</label>
+          <label data-i18n="setting_font_size">Tamaño de fuente</label>
           <div class="font-size-row">
             <button id="font-decrease" class="btn small">A−</button>
             <span id="font-size-value">100%</span>
@@ -200,10 +231,10 @@
           </div>
         </div>
         <div class="setting-group">
-          <label>Modo de visualización</label>
+          <label data-i18n="setting_flow">Modo de visualización</label>
           <div class="theme-buttons">
-            <button data-flow="paginated" class="flow-btn active">Páginas</button>
-            <button data-flow="scrolled" class="flow-btn">Scroll</button>
+            <button data-flow="paginated" class="flow-btn active" data-i18n="flow_paginated">Páginas</button>
+            <button data-flow="scrolled" class="flow-btn" data-i18n="flow_scrolled">Scroll</button>
           </div>
         </div>
       </div>
@@ -224,10 +255,10 @@
       <div class="loader-progress-bar">
         <div class="loader-progress-fill" id="loader-progress-fill"></div>
       </div>
-      <p class="loader-status" id="loader-status">Descomprimiendo libro...</p>
+      <p class="loader-status" id="loader-status" data-i18n="loader_decompressing">Descomprimiendo libro...</p>
       <div id="loader-error-container" class="loader-error-container hidden">
         <p class="loader-error-text" id="loader-error-text"></p>
-        <button id="loader-error-btn" class="btn primary small">Volver al inicio</button>
+        <button id="loader-error-btn" class="btn primary small" data-i18n="loader_error_return">Volver al inicio</button>
       </div>
     </div>
   </div>
