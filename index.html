@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Lector EPUB · GitHub Pages</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- JSZip + epub.js desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+</head>
+<body>
+  <!-- Pantalla de inicio -->
+  <div id="start-screen" class="screen">
+    <div class="start-card">
+      <h1>📖 Lector EPUB</h1>
+      <p class="subtitle">Estático · Funciona en GitHub Pages</p>
+
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Arrastra un archivo <strong>.epub</strong> aquí</p>
+        <p class="or">o</p>
+        <label class="btn primary">
+          Elegir archivo
+          <input type="file" id="file-input" accept=".epub" hidden />
+        </label>
+      </div>
+
+      <div class="url-section">
+        <p>O carga desde una URL:</p>
+        <div class="url-row">
+          <input type="url" id="url-input" placeholder="https://ejemplo.com/libro.epub" />
+          <button id="load-url-btn" class="btn">Cargar</button>
+        </div>
+      </div>
+
+      <p class="hint">
+        Tip: si subes los .epub a tu repositorio de GitHub Pages,<br>
+        puedes usar rutas relativas como <code>./libros/mi-libro.epub</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- Pantalla de lectura -->
+  <div id="reader-screen" class="screen hidden">
+    <!-- Barra superior -->
+    <header id="toolbar">
+      <button id="btn-back" class="icon-btn" title="Volver">←</button>
+      <div class="book-info">
+        <span id="book-title">Cargando...</span>
+        <span id="book-author"></span>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btn-toc" class="icon-btn" title="Tabla de contenidos">☰</button>
+        <button id="btn-settings" class="icon-btn" title="Ajustes">⚙</button>
+      </div>
+    </header>
+
+    <!-- Área del libro -->
+    <main id="viewer-container">
+      <div id="viewer"></div>
+      <button id="prev" class="nav-btn left" title="Anterior">‹</button>
+      <button id="next" class="nav-btn right" title="Siguiente">›</button>
+    </main>
+
+    <!-- Barra de progreso -->
+    <footer id="progress-bar">
+      <div id="progress-fill"></div>
+      <span id="progress-text">0%</span>
+    </footer>
+
+    <!-- Panel lateral TOC -->
+    <aside id="toc-panel" class="panel">
+      <div class="panel-header">
+        <h2>Contenidos</h2>
+        <button id="close-toc" class="icon-btn">×</button>
+      </div>
+      <nav id="toc-list"></nav>
+    </aside>
+
+    <!-- Panel de ajustes -->
+    <aside id="settings-panel" class="panel">
+      <div class="panel-header">
+        <h2>Ajustes</h2>
+        <button id="close-settings" class="icon-btn">×</button>
+      </div>
+      <div class="settings-content">
+        <div class="setting-group">
+          <label>Tema</label>
+          <div class="theme-buttons">
+            <button data-theme="light" class="theme-btn active">Claro</button>
+            <button data-theme="sepia" class="theme-btn">Sepia</button>
+            <button data-theme="dark" class="theme-btn">Oscuro</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>Tamaño de fuente</label>
+          <div class="font-size-row">
+            <button id="font-decrease" class="btn small">A−</button>
+            <span id="font-size-value">100%</span>
+            <button id="font-increase" class="btn small">A+</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>Modo de visualización</label>
+          <div class="theme-buttons">
+            <button data-flow="paginated" class="flow-btn active">Páginas</button>
+            <button data-flow="scrolled" class="flow-btn">Scroll</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Overlay para cerrar paneles -->
+    <div id="overlay" class="hidden"></div>
+  </div>
+
+  <script src="reader.js"></script>
+</body>
+</html>
