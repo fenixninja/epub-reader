@@ -1,0 +1,46 @@
+{
+  "name": "Lector EPUB",
+  "short_name": "EPUB Reader",
+  "description": "Lector de libros electrónicos EPUB rápido, sin servidor y con soporte offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8f6f1",
+  "theme_color": "#2563eb",
+  "categories": ["books", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "fenix_icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "fenix_icons/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "fenix_icons/apple-icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "fenix_icons/android-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "fenix_icons/favicon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "fenix_icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

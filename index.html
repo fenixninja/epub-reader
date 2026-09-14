@@ -20,10 +20,15 @@
   <link rel="icon" type="image/png" sizes="96x96" href="fenix_icons/favicon-96x96.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="fenix_icons/favicon-16x16.png" />
   <link rel="icon" type="image/x-icon" href="fenix_icons/favicon.ico" />
-  <link rel="manifest" href="fenix_icons/manifest.json" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="EPUB Reader" />
+  <meta name="application-name" content="EPUB Reader" />
   <meta name="msapplication-TileColor" content="#ffffff" />
   <meta name="msapplication-TileImage" content="fenix_icons/ms-icon-144x144.png" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#2563eb" />
   <link rel="stylesheet" href="style.css" />
   <!-- Interceptar 'unload' y redirigir a 'pagehide' para cumplir con Permissions-Policy y compatibilidad con bfcache -->
   <script>
@@ -264,6 +269,21 @@
   </div>
 
   <script src="reader.js"></script>
+  <!-- Service Worker Registration para PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('./sw.js')
+          .then((reg) => {
+            console.log('Service Worker registrado correctamente (PWA activa):', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('Error al registrar Service Worker:', err);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>
