@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Lector EPUB · GitHub Pages</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Interceptar 'unload' y redirigir a 'pagehide' para cumplir con Permissions-Policy y compatibilidad con bfcache -->
+  <script>
+    (function() {
+      const _origAdd = EventTarget.prototype.addEventListener;
+      EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (type === 'unload') type = 'pagehide';
+        return _origAdd.call(this, type, listener, options);
+      };
+      const _origRemove = EventTarget.prototype.removeEventListener;
+      EventTarget.prototype.removeEventListener = function(type, listener, options) {
+        if (type === 'unload') type = 'pagehide';
+        return _origRemove.call(this, type, listener, options);
+      };
+    })();
+  </script>
   <!-- JSZip + epub.js desde CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
@@ -153,6 +168,25 @@
 
     <!-- Overlay para cerrar paneles -->
     <div id="overlay" class="hidden"></div>
+  </div>
+
+  <!-- Overlay Loader de descompresión y carga -->
+  <div id="loader-overlay" class="loader-overlay hidden">
+    <div class="loader-card">
+      <div class="loader-spinner-container">
+        <div class="loader-ring"></div>
+        <div class="loader-icon">📖</div>
+      </div>
+      <div class="loader-percent" id="loader-percent">0%</div>
+      <div class="loader-progress-bar">
+        <div class="loader-progress-fill" id="loader-progress-fill"></div>
+      </div>
+      <p class="loader-status" id="loader-status">Descomprimiendo libro...</p>
+      <div id="loader-error-container" class="loader-error-container hidden">
+        <p class="loader-error-text" id="loader-error-text"></p>
+        <button id="loader-error-btn" class="btn primary small">Volver al inicio</button>
+      </div>
+    </div>
   </div>
 
   <script src="reader.js"></script>

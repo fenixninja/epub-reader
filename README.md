@@ -6,6 +6,8 @@ Lector de libros electrónicos EPUB 100% estático. Funciona directamente en Git
 
 - Cargar EPUB desde archivo (arrastrar o seleccionar)
 - Cargar EPUB desde URL
+- **Loader con porcentaje en tiempo real**: Visualización de progreso mientras se descomprime y procesa el libro
+- **Renderizado robusto con fallback automático**: Abre el libro a la primera sin requerir ir manualmente a la tabla de contenidos
 - **Lectura Rápida (por defecto)**: Tipografía optimizada `Fast Sans` para acelerar el ritmo de lectura
 - **Lectura Normal**: Tipografía Sans clásico de alta legibilidad
 - **BeeLine Reader**: Guiado visual por degradados cromáticos entre líneas para evitar pérdidas de foco
@@ -17,6 +19,7 @@ Lector de libros electrónicos EPUB 100% estático. Funciona directamente en Git
 - Navegación por teclado, botones y swipe
 - Guarda automáticamente la posición de lectura
 - Barra de progreso
+- Compatible con Back/Forward Cache (bfcache) de navegadores modernos
 - Soporte para `?book=URL` en la dirección
 
 ## Cómo usarlo en GitHub Pages

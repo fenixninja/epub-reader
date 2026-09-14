@@ -59,6 +59,14 @@ Define las dos pantallas principales de la aplicación y la inclusión de depend
      * Selector de modo de visualización (`data-flow`: `paginated` o `scrolled`).
    * **Capa de bloqueo (`#overlay`):**
      * Fondo oscurecido para cerrar paneles al hacer clic fuera de ellos.
+   * **Overlay de Carga y Descompresión (`#loader-overlay`):**
+     * Pantalla flotante con efecto cristal (`backdrop-filter: blur(10px)`) que informa visualmente del progreso porcentual al descomprimir y procesar libros.
+     * `#loader-percent`: Indicador numérico tabular en tiempo real (0% al 100%).
+     * `#loader-progress-fill`: Barra horizontal animada de progreso.
+     * `#loader-status`: Texto explicativo de la fase actual (*Leyendo archivo*, *Descomprimiendo libro*, *Indexando capítulos*, etc.).
+     * `#loader-error-container`: Panel de error con mensaje amigable y botón `#loader-error-btn` ("Volver al inicio") en caso de archivo no válido.
+   * **Script de compatibilidad bfcache y Permissions Policy (`<head>`):**
+     * Parche temprano que intercepta `EventTarget.prototype.addEventListener("unload")` y lo redirige a `pagehide`, evitando advertencias del navegador y permitiendo la aceleración del Back/Forward Cache.
 
 ---
 
@@ -166,20 +174,32 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
   3. Asocia un listener `click` que salta directamente a la sección mediante `rendition.display(item.href)` y cierra los paneles.
   4. Si el capítulo tiene sub-secciones (`item.subitems`), realiza una llamada recursiva incrementando el nivel.
 
-#### `openBook(source, name = "libro")`
-* **Objetivo:** Función central que procesa y carga el libro EPUB desde un ArrayBuffer o una URL.
+#### `showLoader(status, initialPct)` / `updateLoader(pct, status)` / `hideLoader()` / `showLoaderError(msg)`
+* **Objetivo:** Gestión integral de la interfaz del loader durante la descompresión, indexación y renderizado.
 * **Operaciones:**
-  1. **Limpieza:** Destruye cualquier instancia previa (`book.destroy()`) y limpia los contenedores `#viewer` y `#toc-list`.
-  2. **Inicialización:** Crea la instancia `book = ePub(source)` y define `bookKey` sanitizando el nombre.
-  3. **Metadatos:** Escucha `book.loaded.metadata` para extraer y mostrar título (`meta.title`) y autor (`meta.creator`), además de actualizar el `<title>` de la pestaña.
-  4. **Render:** Configura `book.renderTo(viewer, options)` estableciendo ancho, alto y modo de flujo (`scrolled-doc` o `paginated`).
-  5. **Estilos:** Aplica el tema y tamaño de fuente activos.
-  6. **Restauración:** Carga la posición guardada (`loadSavedLocation()`) o se posiciona al inicio.
-  7. **Generación de ubicaciones:** Ejecuta `book.locations.generate(1024)` para poder calcular porcentajes precisos de avance en todo el libro.
-  8. **Eventos del libro:**
-     * `rendition.on("relocated")`: Actualiza el progreso y guarda la posición cada vez que el lector cambia de página.
-     * `rendition.on("keyup")`: Asocia la navegación por teclado dentro del iframe del libro.
-  9. **Transición de pantalla:** Oculta `#start-screen` y revela `#reader-screen`.
+  * `showLoader(status, initialPct)`: Revela `#loader-overlay`, resetea el indicador numérico y barra al porcentaje inicial indicado y muestra el mensaje de estado.
+  * `updateLoader(pct, status)`: Aplica una transición suave a `#loader-progress-fill`, actualiza el porcentaje tabular `#loader-percent` y refresca `#loader-status`.
+  * `hideLoader()`: Lleva el progreso al 100% (*"¡Listo!"*) y desvanece el overlay tras 280ms.
+  * `showLoaderError(msg)`: Oculta el spinner y barra, presentando una advertencia clara con el botón `#loader-error-btn` ("Volver al inicio") sin dejar la interfaz bloqueada.
+
+#### `openBook(source, name = "libro")`
+* **Objetivo:** Función central que procesa, descomprime y renderiza el libro EPUB desde un ArrayBuffer o URL con seguimiento porcentual y tolerancia a fallos.
+* **Operaciones:**
+  1. **Inicio del Loader (35%):** Muestra `#loader-overlay` informando del inicio de la descompresión.
+  2. **Limpieza:** Destruye cualquier instancia previa (`book.destroy()`) y limpia los contenedores `#viewer` y `#toc-list`.
+  3. **Inicialización y Descompresión (55%):** Invoca `book = ePub(source)` y define `bookKey` sanitizado.
+  4. **Metadatos e Indexación (70% - 85%):** Procesa `book.loaded.metadata` y `book.loaded.spine` para preparar títulos y árbol de capítulos.
+  5. **Configuración de Rendition (90%):** Crea la instancia `book.renderTo(viewer, options)` y registra los hooks de tipografía y prevención de `unload`.
+  6. **Estrategia de Renderizado en Cascada (Fallback Antifallos):**
+     Para evitar pantallas en blanco o que el usuario tenga que ir manualmente al TOC si una posición guardada está corrupta o no coincide con la edición del libro, ejecuta cuatro intentos sucesivos:
+     * *Intento 1:* Carga la posición guardada (`loadSavedLocation()`). Si lanza error, elimina el CFI dañado de `localStorage` y continúa automáticamente.
+     * *Intento 2:* Ejecuta `rendition.display()` estándar (inicio natural del documento).
+     * *Intento 3:* Si el anterior falla, obtiene el primer elemento del spine (`book.spine.spineItems[0].href`) y lo renderiza directamente.
+     * *Intento 4:* Si persiste el fallo, consulta `book.loaded.navigation` y proyecta el primer enlace del índice (`nav.toc[0].href`).
+  7. **Finalización (100%):** Oculta `#start-screen`, revela `#reader-screen`, aplica temas, fuentes y BeeLine, y oculta el loader.
+
+#### `loadBookFromUrl(url, name)`
+* **Objetivo:** Descarga libros desde enlaces web o rutas relativas utilizando la API `ReadableStream` para reportar el porcentaje real de descarga en tiempo real antes de pasar el ArrayBuffer a `openBook`.
 
 #### `keyListener(e)`
 * **Objetivo:** Permite pasar de página mediante el teclado.
@@ -191,18 +211,18 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
 
 ### Controladores de Eventos del Usuario
 
-* **Selección de archivo local (`fileInput`):** Lee el archivo mediante `FileReader` con `readAsArrayBuffer` y ejecuta `openBook`.
+* **Selección de archivo local (`fileInput`):** Lee el archivo mediante `FileReader` con evento `onprogress` reportando del 0% al 30% en el loader, y envía el buffer a `openBook`.
 * **Arrastrar y soltar (`dropZone`):**
   * `dragover` / `dragleave`: Añade o quita la clase visual `.dragover`.
-  * `drop`: Valida que el archivo termine en `.epub`, lo lee como `ArrayBuffer` e invoca `openBook`.
-* **Carga por URL (`loadUrlBtn` y tecla `Enter` en `urlInput`):** Pasa la URL introducida a `openBook`.
+  * `drop`: Valida extensión `.epub`, reporta progreso de lectura y ejecuta `openBook`.
+* **Carga por URL (`loadUrlBtn` y tecla `Enter` en `urlInput`):** Invoca `loadBookFromUrl` con seguimiento de descarga.
 * **Botones de navegación (`#prev`, `#next`):** Invocan `rendition.prev()` y `rendition.next()`.
-* **Botón volver (`#btn-back`):** Destruye la instancia del libro, resetea el DOM, remueve listeners y regresa a `#start-screen`.
+* **Botón volver (`#btn-back` y `#loader-error-btn`):** Destruye la instancia del libro, oculta overlays y regresa a `#start-screen`.
 * **Gestos táctiles / Swipe:**
   * Registra la coordenada X al iniciar el toque (`touchstart`).
   * Calcula la distancia horizontal recorrida al soltar (`touchend`). Si el desplazamiento supera los 60px, avanza o retrocede de página.
 * **Parámetros en la URL (Carga automática):**
-  * Al iniciar, analiza los parámetros `?book=`, `?epub=` o `?url=`. Si encuentra alguno, descarga y abre el libro automáticamente.
+  * Al iniciar, analiza los parámetros `?book=`, `?epub=` o `?url=`. Si encuentra alguno, descarga y abre el libro automáticamente mediante `loadBookFromUrl`.
 
 ---
 
@@ -219,6 +239,7 @@ El archivo define variables para tres esquemas de color:
 * **Selector de Modo de Lectura (`.reading-mode-buttons`, `.reading-mode-btn`):** Botones segmentados con micro-animación para elegir entre Lectura Rápida (Fast Sans) y Lectura Normal (Sans).
 * **Interruptor Deslizante (`.toggle-switch`, `.toggle-slider`):** Switch animado tipo iOS para activar o desactivar BeeLine Reader de manera instantánea.
 * **Cuadrícula de Degradados BeeLine (`.gradient-grid`, `.gradient-btn`):** Tarjetas interactivas con previsualización en miniatura (`.gradient-preview`) de las paletas *Atardecer*, *Océano* y *Aurora*, con degradados CSS adaptativos para modo claro y oscuro.
+* **Modal Loader y Barra de Descompresión (`.loader-overlay`, `.loader-card`):** Capa flotante con efecto *glassmorphism* (`backdrop-filter: blur(10px)`), anillo giratorio suave (`.loader-ring`), icono pulsante, porcentaje numérico tabular de alto contraste (`.loader-percent`) y barra de progreso con gradiente continuo (`.loader-progress-fill`).
 * **Tarjeta de inicio (`.start-card`):** Centrada horizontal y verticalmente, sombras suaves (`--shadow`) y bordes redondeados (`border-radius: 20px`).
 * **Zona de Drop (`.drop-zone`):** Borde punteado que reacciona con transición y color de acento cuando se arrastra un archivo encima (`.dragover`).
 * **Barra superior (`#toolbar`):** Fija a 52px de altura con flexbox, mostrando metadatos truncados (`text-overflow: ellipsis`) para evitar desbordamientos en pantallas pequeñas.
@@ -248,13 +269,20 @@ sequenceDiagram
 
     Usuario->>UI: Arrastra .epub o introduce URL
     UI->>Reader: Evento change / drop / click
+    Reader->>UI: showLoader("Descomprimiendo libro...", 35%)
     Reader->>EpubJS: openBook() -> ePub(source)
-    Reader->>UI: Oculta inicio, muestra lector
+    Reader->>UI: updateLoader("Indexando capítulos...", 82%)
     Reader->>EpubJS: book.renderTo("#viewer")
     Reader->>Storage: loadSavedLocation()
     Storage-->>Reader: CFI guardado o null
-    Reader->>EpubJS: rendition.display(CFI)
+    alt CFI guardado válido
+        Reader->>EpubJS: rendition.display(CFI)
+    else Fallback en cascada antifallos
+        Reader->>EpubJS: rendition.display() / spineItems[0] / toc[0]
+    end
     EpubJS->>UI: Dibuja contenido en iframe
+    Reader->>UI: updateLoader("¡Listo!", 100%) -> hideLoader()
+    Reader->>UI: Oculta inicio, muestra lector
     EpubJS-->>Reader: book.loaded.navigation (TOC)
     Reader->>UI: Genera lista de capítulos (buildToc)
     
