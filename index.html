@@ -94,6 +94,46 @@
           </div>
         </div>
         <div class="setting-group">
+          <label>Modo de lectura</label>
+          <div class="reading-mode-buttons">
+            <button data-reading-mode="fast" class="reading-mode-btn active" title="Lectura rápida con tipografía optimizada Fast Sans">
+              <span class="mode-title">⚡ Lectura rápida</span>
+              <span class="mode-sub">Fast Sans</span>
+            </button>
+            <button data-reading-mode="normal" class="reading-mode-btn" title="Lectura tradicional con tipografía Sans">
+              <span class="mode-title">📖 Lectura normal</span>
+              <span class="mode-sub">Sans clásico</span>
+            </button>
+          </div>
+        </div>
+        <div class="setting-group beeline-group">
+          <div class="setting-header-row">
+            <label for="beeline-toggle" class="clickable-label">BeeLine Reader</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="beeline-toggle" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <p class="setting-hint">Degradados de color en cada línea que guían la vista para leer más rápido y sin saltos.</p>
+          <div id="beeline-palette-options" class="palette-options hidden">
+            <span class="sub-label">Estilo de degradado</span>
+            <div class="gradient-grid">
+              <button class="gradient-btn active" data-gradient="sunset" title="Degradado Atardecer: Violeta, Magenta y Coral">
+                <span class="gradient-preview gradient-sunset"></span>
+                <span class="gradient-name">Atardecer</span>
+              </button>
+              <button class="gradient-btn" data-gradient="ocean" title="Degradado Océano: Azul, Cian y Esmeralda">
+                <span class="gradient-preview gradient-ocean"></span>
+                <span class="gradient-name">Océano</span>
+              </button>
+              <button class="gradient-btn" data-gradient="aurora" title="Degradado Aurora: Púrpura, Azul Neón y Menta">
+                <span class="gradient-preview gradient-aurora"></span>
+                <span class="gradient-name">Aurora</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="setting-group">
           <label>Tamaño de fuente</label>
           <div class="font-size-row">
             <button id="font-decrease" class="btn small">A−</button>

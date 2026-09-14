@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Fast Sans';
+  src: url('fonts/Fast_Sans.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #f8f6f1;
   --text: #1a1a1a;
@@ -424,6 +432,224 @@ html, body {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Reading mode */
+.reading-mode-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.reading-mode-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+}
+
+.reading-mode-btn .mode-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.reading-mode-btn .mode-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.reading-mode-btn[data-reading-mode="fast"] .mode-sub {
+  font-family: 'Fast Sans', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.reading-mode-btn:hover {
+  border-color: var(--accent);
+}
+
+.reading-mode-btn.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.reading-mode-btn.active .mode-sub {
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+/* BeeLine Reader */
+.beeline-group {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.setting-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.clickable-label {
+  cursor: pointer;
+  margin-bottom: 0 !important;
+  font-weight: 600;
+  color: var(--text) !important;
+  font-size: 0.95rem !important;
+}
+
+.setting-hint {
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--border);
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(18px);
+}
+
+/* BeeLine Palette Options */
+.palette-options {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sub-label {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.gradient-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.gradient-btn {
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.gradient-btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.gradient-btn.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.gradient-preview {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  display: block;
+}
+
+.gradient-name {
+  font-size: 0.74rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.gradient-btn.active .gradient-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Gradient themes previews */
+.gradient-sunset {
+  background: linear-gradient(90deg, #4338ca 0%, #db2777 50%, #ea580c 100%);
+}
+
+.gradient-ocean {
+  background: linear-gradient(90deg, #0369a1 0%, #0284c7 50%, #059669 100%);
+}
+
+.gradient-aurora {
+  background: linear-gradient(90deg, #7c3aed 0%, #2563eb 50%, #0d9488 100%);
+}
+
+[data-theme="dark"] .gradient-sunset {
+  background: linear-gradient(90deg, #818cf8 0%, #f472b6 50%, #fb923c 100%);
+}
+
+[data-theme="dark"] .gradient-ocean {
+  background: linear-gradient(90deg, #38bdf8 0%, #2dd4bf 50%, #34d399 100%);
+}
+
+[data-theme="dark"] .gradient-aurora {
+  background: linear-gradient(90deg, #c084fc 0%, #60a5fa 50%, #2dd4bf 100%);
 }
 
 .font-size-row {

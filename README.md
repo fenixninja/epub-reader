@@ -6,6 +6,11 @@ Lector de libros electrónicos EPUB 100% estático. Funciona directamente en Git
 
 - Cargar EPUB desde archivo (arrastrar o seleccionar)
 - Cargar EPUB desde URL
+- **Lectura Rápida (por defecto)**: Tipografía optimizada `Fast Sans` para acelerar el ritmo de lectura
+- **Lectura Normal**: Tipografía Sans clásico de alta legibilidad
+- **BeeLine Reader**: Guiado visual por degradados cromáticos entre líneas para evitar pérdidas de foco
+  - 3 estilos modernos: *Atardecer*, *Océano* y *Aurora*
+  - Adaptación cromática con alto contraste para Claro, Sepia y Oscuro
 - Tabla de contenidos
 - Temas: Claro / Sepia / Oscuro
 - Ajuste de tamaño de fuente

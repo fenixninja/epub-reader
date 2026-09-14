@@ -53,8 +53,10 @@ Define las dos pantallas principales de la aplicación y la inclusión de depend
      * `#toc-list`: Contenedor donde se generan dinámicamente los enlaces a cada capítulo.
    * **Panel lateral de ajustes (`#settings-panel`):**
      * Selector de temas (`data-theme`: `light`, `sepia`, `dark`).
-     * Control de fuente (`#font-decrease`, `#font-size-value`, `#font-increase`).
-     * Selector de modo de lectura (`data-flow`: `paginated` o `scrolled`).
+     * Selector de modo de lectura (`data-reading-mode`: `fast` con `Fast Sans` [por defecto] o `normal` con `Sans`).
+     * Selector de BeeLine Reader (interruptor toggle on/off y selector de 3 degradados modernos: *Atardecer*, *Océano*, *Aurora*).
+     * Control de tamaño de fuente (`#font-decrease`, `#font-size-value`, `#font-increase`).
+     * Selector de modo de visualización (`data-flow`: `paginated` o `scrolled`).
    * **Capa de bloqueo (`#overlay`):**
      * Fondo oscurecido para cerrar paneles al hacer clic fuera de ellos.
 
@@ -73,11 +75,45 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
 | `currentTheme` | `string` | Tema activo (`"light"`, `"sepia"`, `"dark"`). Persistido en `localStorage` (`"epub-theme"`). |
 | `fontSize` | `number` | Porcentaje de tamaño de fuente (70% - 180%). Persistido en `localStorage` (`"epub-font-size"`). |
 | `currentFlow` | `string` | Modo de lectura (`"paginated"` por páginas o `"scrolled"` por desplazamiento continuo). |
+| `currentReadingMode` | `string` | Modo de tipografía (`"fast"` con Fast Sans por defecto, `"normal"` con Sans). Persistido en `localStorage` (`"epub-reading-mode"`). |
+| `beelineEnabled` | `boolean` | Indica si la lectura guiada BeeLine Reader está activada. Persistido en `localStorage` (`"epub-beeline-enabled"`). |
+| `beelineGradient` | `string` | Estilo de degradado activo (`"sunset"`, `"ocean"`, `"aurora"`). Persistido en `localStorage` (`"epub-beeline-gradient"`). |
 | `bookKey` | `string` | Identificador alfanumérico derivado del nombre del archivo para almacenar y recuperar la posición de lectura. |
 
 ---
 
 ### Funciones Principales
+
+#### `injectFontStyles(contents)`
+* **Objetivo:** Inyecta en el `<head>` del iframe del EPUB la regla `@font-face` con URL absoluta hacia `fonts/Fast_Sans.ttf` y el selector con `!important` para sobrescribir las fuentes internas que pudiera tener el libro.
+* **Operaciones:**
+  1. Resuelve la URL absoluta del archivo `.ttf` mediante `new URL('fonts/Fast_Sans.ttf', window.location.href).href`.
+  2. Crea y adjunta el elemento `<style id="epub-font-face">`.
+  3. Crea y actualiza `<style id="epub-font-override">` con la familia tipográfica activa.
+
+#### `applyReadingMode(mode)`
+* **Objetivo:** Alterna entre la tipografía optimizada para lectura rápida (`Fast Sans`) y la tipografía estándar del sistema (`Sans`).
+* **Operaciones:**
+  1. Actualiza `currentReadingMode` y lo persiste en `localStorage`.
+  2. Actualiza la clase activa en los botones `.reading-mode-btn`.
+  3. Reinyecta los estilos de fuente en todos los `contents` activos del libro y llama a `rendition.themes.font()`.
+  4. Si BeeLine está activo, recalcula las líneas para ajustarse a los nuevos anchos de palabra.
+
+#### `applyBeeLine()` / `clearBeeLine()`
+* **Objetivo:** Motor de lectura guiada por color estilo BeeLine Reader.
+* **Operaciones:**
+  * `applyBeeLine()`:
+    1. Recorre párrafos (`p`, `blockquote`, `li`) en los `contents` del libro.
+    2. Guarda el HTML original en `dataset.blOriginal` para permitir reversión limpia.
+    3. Envuelve las palabras de los nodos de texto en `<span class="bl-w">` preservando el formato inline (`<em>`, `<strong>`, `<a>`).
+    4. Detecta las líneas físicas analizando el orden de lectura y la posición `getBoundingClientRect()`, adaptándose tanto a columnas múltiples paginadas como a scroll continuo.
+    5. Asigna una gradación cromática continua de tal modo que la última palabra de la línea $N$ coincide exactamente con el color inicial de la línea $N+1$.
+    6. Aplica las paletas calibradas para Light, Sepia y Dark.
+  * `clearBeeLine()`:
+    Restaura el contenido original guardado en `dataset.blOriginal` y elimina marcas temporales sin recargar el iframe.
+
+#### `setBeelineEnabled(enabled)` / `setBeelineGradient(gradient)`
+* **Objetivo:** Controla el interruptor on/off de BeeLine y el cambio de paleta cromática (*Atardecer*, *Océano*, *Aurora*).
 
 #### `applyTheme(theme)`
 * **Objetivo:** Aplica un tema visual al interfaz general y al contenido dentro del libro.
@@ -86,6 +122,7 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
   2. Guarda la elección en `localStorage`.
   3. Actualiza el estado visual de los botones de selección (`.theme-btn.active`).
   4. Si hay un `rendition` activo, inyecta mediante `rendition.themes.default()` los colores de fondo y texto correspondientes dentro del iframe del libro, asegurando uniformidad visual.
+  5. Si BeeLine está activo, re-aplica el degradado con los tonos adaptados al nuevo tema.
 
 #### `setFontSize(size)`
 * **Objetivo:** Modifica el tamaño de la tipografía dentro del libro.
@@ -94,6 +131,7 @@ Todo el código está encapsulado en una función autoejecutable (IIFE `(() => {
   2. Actualiza el texto en pantalla (`#font-size-value`).
   3. Guarda el valor en `localStorage`.
   4. Si hay un `rendition` activo, llama a `rendition.themes.fontSize("${fontSize}%")`.
+  5. Si BeeLine está activo, recalcula las líneas adaptándose al nuevo flujo de texto.
 
 #### `setFlow(flow)`
 * **Objetivo:** Configura el modo de paginación o scroll continuo.
@@ -177,6 +215,10 @@ El archivo define variables para tres esquemas de color:
 3. **Tema Sepia (`[data-theme="sepia"]`):** Fondo apergaminado (`#f4ecd8`), texto marrón editorial (`#5b4636`), acento madera (`#8b5e3c`).
 
 ### Componentes Clave:
+* **Regla `@font-face` Fast Sans:** Declara la familia tipográfica `Fast Sans` apuntando a `fonts/Fast_Sans.ttf` para su uso en la interfaz y dentro del iframe.
+* **Selector de Modo de Lectura (`.reading-mode-buttons`, `.reading-mode-btn`):** Botones segmentados con micro-animación para elegir entre Lectura Rápida (Fast Sans) y Lectura Normal (Sans).
+* **Interruptor Deslizante (`.toggle-switch`, `.toggle-slider`):** Switch animado tipo iOS para activar o desactivar BeeLine Reader de manera instantánea.
+* **Cuadrícula de Degradados BeeLine (`.gradient-grid`, `.gradient-btn`):** Tarjetas interactivas con previsualización en miniatura (`.gradient-preview`) de las paletas *Atardecer*, *Océano* y *Aurora*, con degradados CSS adaptativos para modo claro y oscuro.
 * **Tarjeta de inicio (`.start-card`):** Centrada horizontal y verticalmente, sombras suaves (`--shadow`) y bordes redondeados (`border-radius: 20px`).
 * **Zona de Drop (`.drop-zone`):** Borde punteado que reacciona con transición y color de acento cuando se arrastra un archivo encima (`.dragover`).
 * **Barra superior (`#toolbar`):** Fija a 52px de altura con flexbox, mostrando metadatos truncados (`text-overflow: ellipsis`) para evitar desbordamientos en pantallas pequeñas.
