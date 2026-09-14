@@ -16,7 +16,7 @@
   --toolbar-h: 52px;
   --progress-h: 28px;
   --radius: 12px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] {
@@ -43,7 +43,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--bg);
@@ -95,16 +96,42 @@ html, body {
 }
 
 .drop-zone {
+  position: relative;
   border: 2px dashed var(--border);
   border-radius: var(--radius);
   padding: 32px 20px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   margin-bottom: 24px;
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.72),
+      rgba(255, 255, 255, 0.82)),
+    url('img/libro.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+[data-theme="dark"] .drop-zone {
+  background-image:
+    linear-gradient(to bottom,
+      rgba(20, 20, 25, 0.75),
+      rgba(20, 20, 25, 0.85)),
+    url('img/libro.jpeg');
+}
+
+[data-theme="sepia"] .drop-zone {
+  background-image:
+    linear-gradient(to bottom,
+      rgba(244, 236, 216, 0.75),
+      rgba(244, 236, 216, 0.85)),
+    url('img/libro.jpeg');
 }
 
 .drop-zone.dragover {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .drop-icon {
@@ -192,6 +219,86 @@ html, body {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.78rem;
+}
+
+/* ========== FEATURED BOOK CTA (WhatAUTH) ========== */
+.featured-book-wrapper {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.featured-book-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel-bg));
+  border: 1.5px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+}
+
+.featured-book-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel-bg));
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.featured-book-btn:active {
+  transform: translateY(0);
+}
+
+.featured-book-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.featured-book-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.featured-book-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.featured-book-title {
+  font-size: 0.92rem;
+  color: var(--text);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.featured-book-title strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.featured-book-arrow {
+  font-size: 1.1rem;
+  color: var(--accent);
+  font-weight: bold;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.featured-book-btn:hover .featured-book-arrow {
+  transform: translateX(4px);
 }
 
 /* ========== READER ========== */
@@ -344,7 +451,7 @@ html, body {
   width: min(320px, 85vw);
   height: 100%;
   background: var(--panel-bg);
-  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
   z-index: 30;
   transform: translateX(100%);
   transition: transform 0.25s ease;
@@ -390,9 +497,22 @@ html, body {
   border-left-color: var(--accent);
 }
 
-#toc-list .toc-level-1 { padding-left: 20px; font-weight: 500; }
-#toc-list .toc-level-2 { padding-left: 36px; font-size: 0.88rem; color: var(--muted); }
-#toc-list .toc-level-3 { padding-left: 52px; font-size: 0.85rem; color: var(--muted); }
+#toc-list .toc-level-1 {
+  padding-left: 20px;
+  font-weight: 500;
+}
+
+#toc-list .toc-level-2 {
+  padding-left: 36px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+#toc-list .toc-level-3 {
+  padding-left: 52px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
 
 .settings-content {
   padding: 20px;
@@ -551,11 +671,11 @@ html, body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
   background-color: var(--accent);
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
   transform: translateX(18px);
 }
 
@@ -569,8 +689,15 @@ html, body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sub-label {
@@ -667,7 +794,7 @@ html, body {
 #overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   z-index: 25;
 }
 
@@ -707,6 +834,7 @@ html, body {
     opacity: 0;
     transform: scale(0.92) translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -733,8 +861,13 @@ html, body {
 }
 
 @keyframes loaderSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loader-icon {
@@ -743,8 +876,15 @@ html, body {
 }
 
 @keyframes loaderPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .loader-percent {
@@ -803,9 +943,11 @@ html, body {
     height: 60px;
     opacity: 0.25;
   }
+
   .start-card {
     padding: 28px 20px;
   }
+
   .loader-card {
     padding: 28px 20px;
   }

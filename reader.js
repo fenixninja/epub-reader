@@ -744,6 +744,15 @@
     if (e.key === "Enter") loadUrlBtn.click();
   });
 
+  // Carga del libro de WhatAUTH (por defecto demo.epub hasta subir el libro final)
+  const loadWhatAuthBtn = $("#load-whatauth-btn");
+  if (loadWhatAuthBtn) {
+    loadWhatAuthBtn.addEventListener("click", () => {
+      const bookUrl = loadWhatAuthBtn.dataset.bookUrl || "./libros/demo.epub";
+      loadBookFromUrl(bookUrl, "WhatAUTH.epub");
+    });
+  }
+
   // Navigation
   $("#prev").addEventListener("click", () => rendition?.prev());
   $("#next").addEventListener("click", () => rendition?.next());

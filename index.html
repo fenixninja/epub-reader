@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Lector EPUB · GitHub Pages</title>
-  <link rel="icon" type="image/x-icon" href="fenix_icon/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="fenix_icon/favicon-32x32.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="fenix_icon/apple-icon-180x180.png" />
+  <!-- Favicons y App Icons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="fenix_icons/apple-icon-57x57.png" />
+  <link rel="apple-touch-icon" sizes="60x60" href="fenix_icons/apple-icon-60x60.png" />
+  <link rel="apple-touch-icon" sizes="72x72" href="fenix_icons/apple-icon-72x72.png" />
+  <link rel="apple-touch-icon" sizes="76x76" href="fenix_icons/apple-icon-76x76.png" />
+  <link rel="apple-touch-icon" sizes="114x114" href="fenix_icons/apple-icon-114x114.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="fenix_icons/apple-icon-120x120.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="fenix_icons/apple-icon-144x144.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="fenix_icons/apple-icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="fenix_icons/apple-icon-180x180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="fenix_icons/android-icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="fenix_icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="fenix_icons/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="fenix_icons/favicon-16x16.png" />
+  <link rel="icon" type="image/x-icon" href="fenix_icons/favicon.ico" />
+  <link rel="manifest" href="fenix_icons/manifest.json" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-TileImage" content="fenix_icons/ms-icon-144x144.png" />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="stylesheet" href="style.css" />
   <!-- Interceptar 'unload' y redirigir a 'pagehide' para cumplir con Permissions-Policy y compatibilidad con bfcache -->
   <script>
-    (function() {
+    (function () {
       const _origAdd = EventTarget.prototype.addEventListener;
-      EventTarget.prototype.addEventListener = function(type, listener, options) {
+      EventTarget.prototype.addEventListener = function (type, listener, options) {
         if (type === 'unload') type = 'pagehide';
         return _origAdd.call(this, type, listener, options);
       };
       const _origRemove = EventTarget.prototype.removeEventListener;
-      EventTarget.prototype.removeEventListener = function(type, listener, options) {
+      EventTarget.prototype.removeEventListener = function (type, listener, options) {
         if (type === 'unload') type = 'pagehide';
         return _origRemove.call(this, type, listener, options);
       };
@@ -27,12 +44,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
 </head>
+
 <body>
   <!-- Pantalla de inicio -->
   <div id="start-screen" class="screen">
     <div class="start-card">
-      <h1>📖 Lector EPUB</h1>
-      <p class="subtitle">Estático · Funciona en GitHub Pages</p>
+      <h1>EPUB</h1>
+      <p class="subtitle">Lector de libros EPUB</p>
 
       <div class="drop-zone" id="drop-zone">
         <div class="drop-icon">📁</div>
@@ -52,10 +70,16 @@
         </div>
       </div>
 
-      <p class="hint">
-        Tip: si subes los .epub a tu repositorio de GitHub Pages,<br>
-        puedes usar rutas relativas como <code>./libros/mi-libro.epub</code>
-      </p>
+      <div class="featured-book-wrapper">
+        <button type="button" id="load-whatauth-btn" class="featured-book-btn" data-book-url="./libros/demo.epub">
+          <span class="featured-book-icon">📖</span>
+          <span class="featured-book-info">
+            <span class="featured-book-badge">Libro gratis</span>
+            <span class="featured-book-title">Leer el libro de <strong>WhatAUTH</strong> gratis</span>
+          </span>
+          <span class="featured-book-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -114,7 +138,8 @@
         <div class="setting-group">
           <label>Modo de lectura</label>
           <div class="reading-mode-buttons">
-            <button data-reading-mode="fast" class="reading-mode-btn active" title="Lectura rápida con tipografía optimizada Fast Sans">
+            <button data-reading-mode="fast" class="reading-mode-btn active"
+              title="Lectura rápida con tipografía optimizada Fast Sans">
               <span class="mode-title">⚡ Lectura rápida</span>
               <span class="mode-sub">Fast Sans</span>
             </button>
@@ -132,11 +157,13 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <p class="setting-hint">Degradados de color en cada línea que guían la vista para leer más rápido y sin saltos.</p>
+          <p class="setting-hint">Degradados de color en cada línea que guían la vista para leer más rápido y sin
+            saltos.</p>
           <div id="beeline-palette-options" class="palette-options hidden">
             <span class="sub-label">Estilo de degradado</span>
             <div class="gradient-grid">
-              <button class="gradient-btn active" data-gradient="sunset" title="Degradado Atardecer: Violeta, Magenta y Coral">
+              <button class="gradient-btn active" data-gradient="sunset"
+                title="Degradado Atardecer: Violeta, Magenta y Coral">
                 <span class="gradient-preview gradient-sunset"></span>
                 <span class="gradient-name">Atardecer</span>
               </button>
@@ -194,4 +221,5 @@
 
   <script src="reader.js"></script>
 </body>
+
 </html>
