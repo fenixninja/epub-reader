@@ -95,7 +95,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  background-image: url("img/animate_book.jpeg");
+  background-image: url("img/animate_book2.jpg");
   background-size: 500px 500px;
   background-repeat: repeat;
   animation: slide-bg 20s linear infinite;
